@@ -1,8 +1,7 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,7 +36,62 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        if !self.is_empty() {
+            let last_idx = self.tail_idx();
+            self.ajust_up(last_idx);
+        }
+    }
+
+    fn tail_idx(&self) -> usize {
+        self.count
+    }
+
+    fn ajust_up(&mut self, idx: usize) {
+        let mut parent_idx = self.parent_idx(idx);
+        let mut idx = idx;
+        while idx > 1
+            && (self.comparator)(
+                self.items.get(idx).unwrap(),
+                self.items.get(parent_idx).unwrap(),
+            )
+        {
+            self.items.swap(idx, parent_idx);
+            idx = parent_idx;
+            parent_idx = self.parent_idx(idx);
+        }
+    }
+
+    fn ajust_down(&mut self, idx: usize) {
+        let mut idx = idx;
+        let mut child_idx;
+        let mut left_idx = self.left_child_idx(idx);
+        let mut right_idx = self.right_child_idx(idx);
+        while left_idx < self.len() {
+            if right_idx <= self.len()
+                && (self.comparator)(
+                    self.items.get(left_idx).unwrap(),
+                    self.items.get(right_idx).unwrap(),
+                )
+            {
+                child_idx = left_idx;
+            } else {
+                child_idx = right_idx;
+            }
+
+            if (self.comparator)(
+                self.items.get(idx).unwrap(),
+                self.items.get(child_idx).unwrap(),
+            ) {
+                break;
+            }
+
+            self.items.swap(idx, child_idx);
+            idx = child_idx;
+            left_idx = self.left_child_idx(idx);
+            right_idx = self.right_child_idx(idx);
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +111,7 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        0
     }
 }
 
@@ -84,8 +137,17 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        } else {
+            let tail = self.tail_idx();
+            self.items.swap(1, tail);
+            let v = self.items.pop();
+            self.count -= 1;
+            self.ajust_down(1);
+            // self.print_heap();
+            v
+        }
     }
 }
 
